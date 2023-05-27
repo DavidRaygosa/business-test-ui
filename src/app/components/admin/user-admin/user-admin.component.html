@@ -1,0 +1,190 @@
+<div *ngIf="!loadingUsers">
+
+    <main class="col-12 p-4" *ngIf="permissions.includes(PermissionEnum.Client_Get_All)">
+
+        <h3 class="text-muted">Usuarios</h3>
+        <hr/>
+
+        <div class="table-responsive" *ngIf="Clients.length > 0">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellido</th>
+                        <th scope="col">Dirección</th>
+                        <th scope="col">Role Id</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Client_Update)">Editar</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Client_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let client of Clients">
+                        <th scope="row">{{client.name}}</th>
+                        <td>{{client.lastname}}</td>
+                        <td class="text-wrap">{{client.direction}}</td>
+                        <td>{{client.roleId}}</td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Client_Update)">
+                            <button class="btn btn-primary" (click)="onShowUpdateUserModel(client)"><fa-icon [icon]="faPencil"></fa-icon></button>
+                        </td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Client_Delete)">
+                            <button class="btn btn-danger" (click)="onShowDeleteUserModal(client)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-12 text-center" *ngIf="Clients.length <= 0">
+            <span class="text-muted">No hay ningun usuario de momento</span>
+        </div>
+
+    </main>
+
+    <div class="col-12 d-flex justify-content-center align-items-center" *ngIf="!permissions.includes(PermissionEnum.Client_Get_All)">
+        <span class="text-danger">Sin autorización - 401</span>
+    </div>
+
+    <!--------------------------------------------------------- EDIT USER MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #editUserButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#editUserModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Client_Update)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Actualizar usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="editUserForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faUser" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editUserForm.get('name')?.valid }" 
+                                    id="newUser-name-input" 
+                                    placeholder="Nombre" 
+                                    formControlName="name"
+                                >
+                                <label for="newUser-name-input">Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faUser" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editUserForm.get('lastname')?.valid }" 
+                                    id="newUser-lastname-input" 
+                                    placeholder="Apellido" 
+                                    formControlName="lastname"
+                                >
+                                <label for="newUser-lastname-input">Apellido</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faLocationDot" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editUserForm.get('direction')?.valid }" 
+                                    id="newUser-direction-input" 
+                                    placeholder="Dirección (Opcional)" 
+                                    formControlName="direction"
+                                >
+                                <label for="newUser-direction-input">Dirección (Opcional)</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faKey" class="col-2 text-center"></fa-icon>
+                            <div class="col-10">
+                                <select class="form-select" aria-label="Role Select" formControlName="roleId">
+                                    <option [value]="role.id" [selected]="role.id == editUserForm.value.roleId" *ngFor="let role of Roles">{{role.name}}</option>
+                                </select>
+                            </div>
+                            
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!editUserForm.valid || updatingUser" (click)="onUpdateUser()">
+                        <span *ngIf="!updatingUser">Actualizar usuario</span>
+                        <div class="spinner-grow" role="status" *ngIf="updatingUser">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT USER MODAL ---------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- EDIT USER MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deleteUserButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deleteUserModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Client_Delete)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Eliminar usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12 text-center">
+                    <p>Se eliminará el usuario con nombre <b>{{handlClient?.name}} {{handlClient?.lastname}}</b></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="deletingUser" (click)="onDeleteUser()">
+                        <span *ngIf="!deletingUser">Eliminar usuario</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingUser">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT USER MODAL ---------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+</div>
+
+<div class="d-flex flex-wrap col-12 p-4" *ngIf="loadingUsers">
+    <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+</div>
+
+<!-- ERROR ALERT -->
+<div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+    <span>{{errorMessage}}</span>
+</div>
+
+<!-- ALERT -->
+<div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+    <span>{{alertMessage}}</span>
+</div>

@@ -1,0 +1,13 @@
+# fly.toml app configuration file generated for business-test-ui-david-raygosa on 2023-05-27T16:34:23-06:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "business-test-ui-david-raygosa"
+primary_region = "qro"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true

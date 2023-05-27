@@ -1,0 +1,94 @@
+<skeleton-block effect="wave" class="col-12 mb-4" height="50px" *ngIf="loading">Cargando cabecera...</skeleton-block>
+
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" *ngIf="!loading">
+    <div class="container-fluid">
+        <a class="navbar-brand" [routerLink]="['']" (click)="handleActiveRoute()">Home</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/shoppingcart' ? 'active' : ''" 
+                        [routerLink]="['shoppingcart']"
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.ClientItem_Get_All)"
+                    >
+                        Carrito de compras
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/admin' ? 'active' : ''" 
+                        [routerLink]="['admin']" 
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.Item_Admin)"
+                    >
+                        Gestionar articulos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/admin/store' ? 'active' : ''" 
+                        [routerLink]="['admin/store']" 
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.Store_Admin)"
+                    >
+                        Gestionar sucursales
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/admin/order' ? 'active' : ''" 
+                        [routerLink]="['admin/order']" 
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.ClientItem_Admin)"
+                    >
+                        Gestionar pedidos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/admin/user' ? 'active' : ''" 
+                        [routerLink]="['admin/user']" 
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.Client_Admin)"
+                    >
+                        Gestionar usuarios
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/admin/role' ? 'active' : ''" 
+                        [routerLink]="['admin/role']" 
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.Role_Admin)"
+                    >
+                        Gestionar roles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a 
+                        class="nav-link" 
+                        [ngClass]="CurrentRoute == '/admin/permission' ? 'active' : ''" 
+                        [routerLink]="['admin/permission']" 
+                        (click)="handleActiveRoute()"
+                        *ngIf="permissions.includes(PermissionEnum.Permission_Admin)"
+                    >
+                        Gestionar permisos
+                    </a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <button class="btn btn-outline-danger" (click)="onCloseSession()">Cerrar sesión</button>
+            </div>
+        </div>
+    </div>
+</nav>

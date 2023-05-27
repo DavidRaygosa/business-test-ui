@@ -1,0 +1,159 @@
+<main class="vw-100 vh-100 d-flex flex-row">
+
+    <!-- LEFT SECTION -->
+    <section id="login-background-left" class="d-none d-lg-block col-8 h-100">
+        <div id="login-background-left-contrast" class="col-12 h-100"></div>
+    </section>
+
+    <!-- RIGHT SECTION -->
+    <section class="col-12 col-lg-4 h-100 d-flex justify-content-center align-items-center p-2 bg-secondary">
+
+        <!-- LOGIN FORM -->
+        <div 
+            class="col-12 col-lg-8 shadow rounded d-flex flex-column justify-content-center align-items-center p-4 bg-white" 
+            data-aos="fade-down" 
+            data-aos-duration="500"
+            *ngIf="!registerPanel"
+        >
+            <h3 class="text-muted">Acceso</h3>
+            <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="mt-4 col-12 text-center">
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faUser" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-10">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [ngClass]="{ 'border-danger': !loginForm.get('username')?.valid }" 
+                            id="login-user-input" 
+                            placeholder="Usuario" 
+                            formControlName="username"
+                        >
+                        <label for="login-user-input">Usuario</label>
+                    </div>
+                </div>
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faKey" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-8">
+                        <input 
+                            #loginPasswordInput 
+                            type="password" 
+                            class="form-control" 
+                            id="login-password-input" 
+                            placeholder="Contraseña" 
+                            formControlName="password"
+                            [ngClass]="{ 'border-danger': !loginForm.get('password')?.valid }"
+                        >
+                        <label for="login-password-input">Contraseña</label>
+                    </div>
+                    <fa-icon id="login-password-toggle-view" [icon]="inputToggle" class="col-2 text-center cursor-pointer" (click)="onTogglePasswordView(loginPasswordInput)"></fa-icon>
+                </div>
+                <hr/>
+                <button type="submit" class="btn btn-primary col-12 mb-4" [disabled]="!loginForm.valid || logging">
+                    <span *ngIf="!logging">Ingresar</span>
+                    <div class="spinner-grow" role="status" *ngIf="logging">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </button>
+                <span class="link-primary cursor-pointer" (click)="onClickRegister()">¿Aun no tienes una cuenta?. ¡Crea aqui una gratis!</span>
+            </form>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div 
+            class="col-12 col-lg-8 shadow rounded d-flex flex-column justify-content-center align-items-center p-4 bg-white" 
+            data-aos="fade-down" 
+            data-aos-duration="500"
+            *ngIf="registerPanel"
+            >
+            <h3 class="text-muted">Registro</h3>
+            <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="mt-4 col-12 text-center">
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faUser" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-10">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="register-user-input" 
+                            placeholder="Usuario"
+                            formControlName="username"
+                            [ngClass]="{ 'border-danger': !registerForm.get('username')?.valid }"
+                        >
+                        <label for="register-user-input">Usuario</label>
+                    </div>
+                </div>
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faKey" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-8">
+                        <input 
+                            #registerPasswordInput 
+                            type="password" 
+                            class="form-control" 
+                            id="register-password-input" 
+                            placeholder="Contraseña"
+                            formControlName="password"
+                            [ngClass]="{ 'border-danger': !registerForm.get('password')?.valid }"
+                        >
+                        <label for="register-password-input">Contraseña</label>
+                    </div>
+                    <fa-icon id="register-password-toggle-view" [icon]="inputToggle" class="col-2 text-center cursor-pointer" (click)="onTogglePasswordView(registerPasswordInput)"></fa-icon>
+                </div>
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faUser" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-10">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="register-name-input" 
+                            placeholder="Nombre(s)"
+                            formControlName="name"
+                            [ngClass]="{ 'border-danger': !registerForm.get('name')?.valid }"
+                        >
+                        <label for="register-name-input">Nombre(s)</label>
+                    </div>
+                </div>
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faUser" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-10">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="register-lastname-input" 
+                            placeholder="Apellidos"
+                            formControlName="lastname"
+                            [ngClass]="{ 'border-danger': !registerForm.get('lastname')?.valid }"
+                        >
+                        <label for="register-lastname-input">Apellidos</label>
+                    </div>
+                </div>
+                <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                    <fa-icon [icon]="faLocationDot" class="col-2 text-center"></fa-icon>
+                    <div class="form-floating col-10">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="register-direction-input" 
+                            placeholder="Dirección (Opcional)"
+                            formControlName="direction"
+                            [ngClass]="{ 'border-danger': !registerForm.get('direction')?.valid }"
+                        >
+                        <label for="register-direction-input">Dirección (Opcional)</label>
+                    </div>
+                </div>
+                <hr/>
+                <button type="submit" class="btn btn-primary col-12 mb-4" [disabled]="!registerForm.valid || registering">
+                    <span *ngIf="!registering">Registrar</span>
+                    <div class="spinner-grow" role="status" *ngIf="registering">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </button>
+                <span class="link-primary cursor-pointer" (click)="onClickLogin()">¿Ya tienes una cuenta?. ¡Ingresa aqui!</span>
+            </form>
+        </div>
+
+    </section>
+
+    <!-- ERROR ALERT -->
+    <div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+        <span>{{errorMessage}}</span>
+    </div>
+</main>

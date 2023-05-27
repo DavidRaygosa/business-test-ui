@@ -1,0 +1,108 @@
+<div *ngIf="!loadingOrders">
+
+    <main class="col-12 p-4" *ngIf="permissions.includes(PermissionEnum.ClientItem_Admin)">
+
+        <h3 class="text-muted">Pedidos</h3>
+        <hr/>
+
+        <div class="table-responsive" *ngIf="Orders.length > 0">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Codigo</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Imagen</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.ClientItem_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let order of Orders">
+                        <th scope="row">{{order.client?.name}} {{order.client?.lastname}}</th>
+                        <td>{{order.item?.code}}</td>
+                        <td class="text-wrap">{{order.item?.description}}</td>
+                        <td>{{order.quantity}}</td>
+                        <td>{{ order.item?.price | currency }}</td>
+                        <td><img width="50px" height="50px" src="{{order.item?.image}}" *ngIf="order.item?.image"/></td>
+                        <td>{{ order.date + 'Z' | date: 'd MMMM y h:mm:ss a' : 'UTC-6' : 'es-Mx' }}</td>
+                        <td *ngIf="permissions.includes(PermissionEnum.ClientItem_Delete)">
+                            <button class="btn btn-danger" (click)="onShowDeleteModal(order)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-12 text-center" *ngIf="Orders.length <= 0">
+            <span class="text-muted">Sin ningun pedido</span>
+        </div>
+    </main>
+
+    <div class="col-12 d-flex justify-content-center align-items-center" *ngIf="!permissions.includes(PermissionEnum.ClientItem_Admin)">
+        <span class="text-danger">Sin autorización - 401</span>
+    </div>
+
+    <!--------------------------------------------------------- DELETE CLIENT ITEM MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deleteClientItemButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deleteClientItemModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteClientItemModal" tabindex="-1" aria-labelledby="deleteClientItemModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.ClientItem_Delete)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteClientItemModalLabel">Eliminar pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12 text-center">
+                    <p>
+                        Se eliminará el pedido del cliente <b>{{handleOrder?.client?.name}} {{handleOrder?.client?.lastname}}</b>
+                        <br/>
+                        <img width="200px" height="200px" src="{{handleOrder?.item?.image}}" *ngIf="handleOrder?.item?.image" />
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="deletingOrder" (click)="onDeleteClientItem()">
+                        <span *ngIf="!deletingOrder">Eliminar pedido</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingOrder">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END DELETE CLIENT ITEM MODAL ----------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+</div>
+
+<div class="d-flex flex-wrap col-12 p-4" *ngIf="loadingOrders">
+    <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+</div>
+
+<!-- ERROR ALERT -->
+<div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+    <span>{{errorMessage}}</span>
+</div>
+
+<!-- ALERT -->
+<div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+    <span>{{alertMessage}}</span>
+</div>

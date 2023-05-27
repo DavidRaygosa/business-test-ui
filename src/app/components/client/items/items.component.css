@@ -1,0 +1,12 @@
+.counter {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.counter input {
+    width: 20%;
+    text-align: center;
+    color: #0052cc;
+    border: 0;
+}

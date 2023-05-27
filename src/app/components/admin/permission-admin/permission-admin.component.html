@@ -1,0 +1,204 @@
+<div *ngIf="!loadingPermissions">
+
+    <main class="col-12 p-4" *ngIf="permissions.includes(PermissionEnum.Permission_Get_All)">
+        
+        <h3 class="text-muted">Permisos</h3>
+        <hr/>
+
+        <div class="d-flex justify-content-end col-12 mb-2" *ngIf="permissions.includes(PermissionEnum.Permission_Create)">
+            <button class="btn btn-warning" (click)="onShowCreateModal()">
+                <fa-icon [icon]="faPlus" class="col-2 text-center"></fa-icon>
+                Crear permiso
+            </button>
+        </div>
+
+        <div class="table-responsive" *ngIf="Permissions.length > 0">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Permission_Update)">Editar</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Permission_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let permission of Permissions">
+                        <th scope="row">{{permission.name}}</th>
+                        <td *ngIf="permissions.includes(PermissionEnum.Permission_Update)">
+                            <button class="btn btn-primary" (click)="onShowUpdateModal(permission)"><fa-icon [icon]="faPencil"></fa-icon></button>
+                        </td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Permission_Delete)">
+                            <button class="btn btn-danger" (click)="onShowDeleteModal(permission)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-12 text-center" *ngIf="Permissions.length <= 0">
+            <span class="text-muted">No hay ningun permisos de momento</span>
+        </div>
+
+    </main>
+
+    <div class="col-12 d-flex justify-content-center align-items-center" *ngIf="!permissions.includes(PermissionEnum.Permission_Get_All)">
+        <span class="text-danger">Sin autorización - 401</span>
+    </div>
+
+    <!--------------------------------------------------------- CREATE PERMISSION MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #newPermissionButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#newPermissionModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newPermissionModal" tabindex="-1" aria-labelledby="newPermissionModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Permission_Create)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newPermissionModalLabel">Crear permiso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="newPermissionForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newPermissionForm.get('name')?.valid }" 
+                                    id="newPermission-name-input" 
+                                    placeholder="Nombre" 
+                                    formControlName="name"
+                                >
+                                <label for="newPermission-name-input">Nombre</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" [disabled]="!newPermissionForm.valid || creatingPermission" (click)="onCreatePermission()">
+                        <span *ngIf="!creatingPermission">Crear permiso</span>
+                        <div class="spinner-grow" role="status" *ngIf="creatingPermission">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END CREATE PERMISSION MODAL -------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- EDIT PERMISSION MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #editPermissionButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#editPermissionModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editPermissionModal" tabindex="-1" aria-labelledby="editPermissionModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Permission_Update)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPermissionModalLabel">Editar permiso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="editPermissionForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editPermissionForm.get('name')?.valid }" 
+                                    id="editPermission-name-input" 
+                                    placeholder="Nombre" 
+                                    formControlName="name"
+                                >
+                                <label for="editPermission-name-input">Nombre</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!editPermissionForm.valid || updatingPermission" (click)="onUpdatePermission()">
+                        <span *ngIf="!updatingPermission">Editar permiso</span>
+                        <div class="spinner-grow" role="status" *ngIf="updatingPermission">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT PERMISSION MODAL -------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- DELETE PERMISSION MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deletePermissionButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deletePermissionModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deletePermissionModal" tabindex="-1" aria-labelledby="deletePermissionModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Permission_Delete)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deletePermissionModalLabel">Eliminar permiso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Se eliminará el siguiente permiso <b>{{handlePermission?.name}}</b>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="deletingPermission" (click)="onDeletePermission()">
+                        <span *ngIf="!deletingPermission">Eliminar permiso</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingPermission">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END DELETE PERMISSION MODAL -------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+</div>
+
+<div class="d-flex flex-wrap col-12 p-4" *ngIf="loadingPermissions">
+    <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+</div>
+
+<!-- ERROR ALERT -->
+<div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+    <span>{{errorMessage}}</span>
+</div>
+
+<!-- ALERT -->
+<div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+    <span>{{alertMessage}}</span>
+</div>

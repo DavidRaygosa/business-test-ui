@@ -1,0 +1,219 @@
+<main id="store-item-admin-panel" class="d-flex flex-column col-12 p-2" *ngIf="permissions.includes(PermissionEnum.ItemStore_Admin)">
+
+    <section *ngIf="!loadingItemStore">
+
+        <div class="d-flex flex-row justify-content-between col-12">
+            <h3 class="text-muted">{{Store.branch}} -> Articulos</h3>
+            <button class="btn btn-warning" *ngIf="permissions.includes(PermissionEnum.ItemStore_Create)" (click)="onShowAddItemModal()">
+                <fa-icon [icon]="faPlus" class="col-2 text-center"></fa-icon>
+                Añadir articulo
+            </button>
+        </div>
+        
+        <hr/>
+
+        <div class="table-responsive" *ngIf="permissions.includes(PermissionEnum.ItemStore_Get_All)">
+            <div *ngIf="ItemsStore.length <= 0" class="col-12 text-center text-muted"><span>No hay ningun item en la sucursal</span></div>
+            <table class="table" *ngIf="ItemsStore.length > 0">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Codigo</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Imagen</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.ItemStore_Update)">Cambiar</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.ItemStore_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let itemStore of ItemsStore">
+                        <th scope="row">{{itemStore.item?.code}}</th>
+                        <td class="text-wrap">{{itemStore.item?.description}}</td>
+                        <td><img width="50px" height="50px" src="{{itemStore.item?.image}}" *ngIf="itemStore.item?.image"/></td>
+                        <td>{{itemStore.date + 'Z' | date: 'd MMMM y h:mm:ss a' : 'UTC-6' : 'es-Mx'}}</td>
+                        <td *ngIf="permissions.includes(PermissionEnum.ItemStore_Update)">
+                            <button class="btn btn-primary" (click)="onShowUpdateModal(itemStore)"><fa-icon [icon]="faPencil"></fa-icon></button>
+                        </td>
+                        <td *ngIf="permissions.includes(PermissionEnum.ItemStore_Delete)">
+                            <button class="btn btn-danger" (click)="onShowDeleteModal(itemStore)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <div class="col-12 mt-2" *ngIf="loadingItemStore">
+        <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    </div>
+    
+    <!--------------------------------------------------------- NEW ITEM STORE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #newItemStoreButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#newItemStoreModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newItemStoreModal" tabindex="-1" aria-labelledby="newItemStoreModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.ItemStore_Create)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newItemStoreModalLabel">Añadir articulo a la sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <div class="table-responsive" *ngIf="permissions.includes(PermissionEnum.ItemStore_Create)">
+                        <div *ngIf="Items.length <= 0" class="col-12 text-center text-muted"><span>No hay ningun articulo</span></div>
+                        <table class="table" *ngIf="Items.length > 0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col">Descripción</th>
+                                    <th scope="col">Imagen</th>
+                                    <th scope="col" *ngIf="permissions.includes(PermissionEnum.ItemStore_Create)">Agregar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of Items">
+                                    <th class="text-wrap" scope="row">{{item.description}}</th>
+                                    <td><img width="50px" height="50px" src="{{item.image}}" *ngIf="item.image"/></td>
+                                    <td *ngIf="permissions.includes(PermissionEnum.ItemStore_Create)">
+                                        <button class="btn btn-warning" (click)="onCreateItemStore(item)" [disabled]="creatingItemStore">
+                                            <fa-icon [icon]="faPlus" *ngIf="!creatingItemStore"></fa-icon>
+                                            <div class="spinner-grow" role="status" *ngIf="creatingItemStore">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- NEW ITEM STORE MODAL ----------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- EDIT ITEM STORE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #editItemStoreButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#editItemStoreModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editItemStoreModal" tabindex="-1" aria-labelledby="editItemStoreModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.ItemStore_Update)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemStoreModalLabel">Cambiar articulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <div class="table-responsive" *ngIf="permissions.includes(PermissionEnum.ItemStore_Update)">
+                        <div *ngIf="Items.length <= 0" class="col-12 text-center text-muted"><span>No hay ningun articulo</span></div>
+                        <table class="table" *ngIf="Items.length > 0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col">Descripción</th>
+                                    <th scope="col">Imagen</th>
+                                    <th scope="col" *ngIf="permissions.includes(PermissionEnum.ItemStore_Update)">Cambiar por</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of Items">
+                                    <th class="text-wrap" scope="row">{{item.description}}</th>
+                                    <td><img width="50px" height="50px" src="{{item.image}}" *ngIf="item.image"/></td>
+                                    <td *ngIf="permissions.includes(PermissionEnum.ItemStore_Update)">
+                                        <button class="btn btn-primary" (click)="onUpdateItemStore(item)" [disabled]="updatingItemStore">
+                                            <fa-icon [icon]="faPencil" *ngIf="!updatingItemStore"></fa-icon>
+                                            <div class="spinner-grow" role="status" *ngIf="updatingItemStore">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT ITEM STORE MODAL ----------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- DELETE ITEM STORE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deleteItemStoreButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deleteItemStoreModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteItemStoreModal" tabindex="-1" aria-labelledby="deleteItemStoreModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.ItemStore_Delete)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteItemStoreModalLabel">Eliminar articulo de la sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12 text-center">
+                    <p>
+                        Se eliminará el siguiente articulo <b>{{handleItemStore?.item?.code}}</b> de la secursal
+                        <br/>
+                        <img width="200px" height="200px" src="{{handleItemStore?.item?.image}}" *ngIf="handleItemStore?.item?.image" />
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="deletingItemStore" (click)="onDeleteItemStore()">
+                        <span *ngIf="!deletingItemStore">Eliminar articulo</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingItemStore">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END DELETE ITEM STORE MODAL ----------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+</main>
+
+<div class="d-flex justify-content-center align-items-center col-12 p-2" *ngIf="!permissions.includes(PermissionEnum.ItemStore_Admin)">
+    <span class="text-danger">¡Sin autorización - 401!</span>
+</div>
+
+<!-- ERROR ALERT -->
+<div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+    <span>{{errorMessage}}</span>
+</div>
+
+<!-- ALERT -->
+<div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+    <span>{{alertMessage}}</span>
+</div>

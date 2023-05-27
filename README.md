@@ -2,6 +2,15 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.8.
 
+### `npm install`
+Please make npm install before start the angular project
+
+### `npm run prod`
+To start the angular project in production mode
+
+### `npm run dev`
+To start the angular project in development mode
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.

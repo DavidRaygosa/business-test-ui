@@ -1,0 +1,57 @@
+<div *ngIf="!loadingItems">
+
+    <main class="col-12 p-4" *ngIf="permissions.includes(PermissionEnum.Item_Get_All)">
+        <div class="col-12 text-center" *ngIf="Items.length <= 0">
+            <span class="text-muted">Por el momento no hay ningun articulo disponible</span>
+        </div>
+        
+        <ul *ngIf="Items.length > 0" class="list-unstyled d-flex flex-wrap">
+            <li *ngFor="let item of Items">
+                <div class="card me-4 mb-2 p-2 shadow" style="width: 18rem; height: 35rem;">
+                    <img height="250px" src="{{item.image}}" class="card-img-top">
+                    <div class="card-body overflow-auto mb-2">
+                        <h5 class="card-title">{{item.code}}</h5>
+                        <p class="card-text">{{item.description}}</p>
+                    </div>
+                    <div class="col-12 d-flex flex-column align-items-end mb-2">
+                        <span class="card-text">{{item.price | currency}}</span>
+                        <span class="card-text">Disponibles: {{item.stock}}</span>
+                    </div>
+                    <div class="col-12" *ngIf="item.stock">
+                        <div class="counter mb-2" *ngIf="item.quantity">
+                            <button class="btn btn-primary p-2" (click)="handleRemoveQuantity(item)" [disabled]="item.quantity <= 1">-</button>
+                            <input type="text" value={{item.quantity}} disabled>
+                            <button class="btn btn-primary p-2" (click)="handleAddQuantity(item)" [disabled]="item.quantity >= item.stock">+</button>
+                        </div>
+                        <button class="btn btn-primary col-12" *ngIf="item.stock > 0" (click)="onAddToShoppingCart(item)">Añadir al carrito</button>
+                    </div>
+                    <button class="btn btn-primary col-12" *ngIf="!item.stock" disabled>Sin stock</button>
+                </div>
+            </li>
+        </ul>
+    </main>
+
+</div>
+
+<div class="d-flex flex-wrap col-12 p-4" *ngIf="loadingItems">
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+    <skeleton-block effect="wave" class="mb-4 me-4" width="320px" height="500px"></skeleton-block>
+</div>
+
+<!-- ERROR ALERT -->
+<div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+    <span>{{errorMessage}}</span>
+</div>
+
+<!-- ALERT -->
+<div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+    <span>{{alertMessage}}</span>
+</div>

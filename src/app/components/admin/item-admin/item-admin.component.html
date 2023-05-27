@@ -1,0 +1,320 @@
+<main id="item-admin-panel" class="d-flex flex-column col-12 p-2" *ngIf="permissions.includes(PermissionEnum.Item_Admin)">
+
+    <div class="d-flex justify-content-end col-12" *ngIf="permissions.includes(PermissionEnum.Item_Create)">
+        <button class="btn btn-warning" (click)="onShowModalNewItem()">
+            <fa-icon [icon]="faPlus" class="col-2 text-center"></fa-icon>
+            Crear articulo
+        </button>
+    </div>
+
+    <div class="col-12 mt-2" *ngIf="!loadingItems && permissions.includes(PermissionEnum.Item_Get_All)">
+        <hr />
+        <div class="table-responsive">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Codigo</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Imagen</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Item_Update)">Editar</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Item_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of Items">
+                        <th scope="row">{{item.code}}</th>
+                        <td class="text-wrap">{{item.description}}</td>
+                        <td>{{ item.price | currency }}</td>
+                        <td>{{item.stock}}</td>
+                        <td><img width="50px" height="50px" src="{{item.image}}" *ngIf="item.image"/></td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Item_Update)">
+                            <button class="btn btn-primary" (click)="onShowModalEditItem(item)"><fa-icon [icon]="faPencil"></fa-icon></button>
+                        </td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Item_Delete)">
+                            <button class="btn btn-danger" (click)="onShowModalDeleteItem(item)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-12 mt-2" *ngIf="loadingItems">
+        <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    </div>
+
+    <!--------------------------------------------------------- NEW ITEM MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #newItemButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#newItemModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newItemModal" tabindex="-1" aria-labelledby="newItemModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Item_Create)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newItemModalLabel">Crear articulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="newItemForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faBarcode" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newItemForm.get('code')?.valid }" 
+                                    id="newItem-code-input" 
+                                    placeholder="Codigo" 
+                                    formControlName="code"
+                                >
+                                <label for="newItem-code-input">Codigo</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newItemForm.get('description')?.valid }" 
+                                    id="newItem-description-input" 
+                                    placeholder="Descripción" 
+                                    formControlName="description"
+                                >
+                                <label for="newItem-description-input">Descripción</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faCircleDollarToSlot" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newItemForm.get('price')?.valid }" 
+                                    id="newItem-price-input" 
+                                    placeholder="Precio" 
+                                    formControlName="price"
+                                >
+                                <label for="newItem-price-input">Precio</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faImage" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="file" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newItemForm.get('imageBase64')?.valid }" 
+                                    id="newItem-imageBase64-input" 
+                                    placeholder="Imagen"
+                                    accept="image/*"
+                                    (change)="onNewImageSelected($event)"
+                                >
+                            </div>
+                        </div>
+                        <img width="200px" height="200px" [src]="imagePath" *ngIf="imagePath"/>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faBoxArchive" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="number" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newItemForm.get('stock')?.valid }" 
+                                    id="newItem-stock-input" 
+                                    placeholder="Stock" 
+                                    formControlName="stock"
+                                >
+                                <label for="newItem-stock-input">Stock</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" [disabled]="!newItemForm.valid || creatingItem" (click)="onNewItemSubmit()">
+                        <span *ngIf="!creatingItem">Crear articulo</span>
+                        <div class="spinner-grow" role="status" *ngIf="creatingItem">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END NEW ITEM MODAL ----------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- EDIT ITEM MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #editItemButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#editItemModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Item_Update)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Editar articulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="editItemForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faBarcode" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editItemForm.get('code')?.valid }" 
+                                    id="editItem-code-input" 
+                                    placeholder="Codigo" 
+                                    formControlName="code"
+                                >
+                                <label for="editItem-code-input">Codigo</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editItemForm.get('description')?.valid }" 
+                                    id="editItem-description-input" 
+                                    placeholder="Descripción" 
+                                    formControlName="description"
+                                >
+                                <label for="editItem-description-input">Descripción</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faCircleDollarToSlot" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editItemForm.get('price')?.valid }" 
+                                    id="editItem-price-input" 
+                                    placeholder="Precio" 
+                                    formControlName="price"
+                                >
+                                <label for="editItem-price-input">Precio</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faImage" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="file" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editItemForm.get('imageBase64')?.valid }" 
+                                    id="editItem-imageBase64-input" 
+                                    placeholder="Imagen"
+                                    accept="image/*"
+                                    (change)="onEditImageSelected($event)"
+                                >
+                            </div>
+                        </div>
+                        <img width="200px" height="200px" [src]="imagePathEdit" *ngIf="imagePathEdit"/>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faBoxArchive" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="number" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editItemForm.get('stock')?.valid }" 
+                                    id="editItem-stock-input" 
+                                    placeholder="Stock" 
+                                    formControlName="stock"
+                                >
+                                <label for="editItem-stock-input">Stock</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!editItemForm.valid || updatingItem" (click)="onEditItemSubmit()">
+                        <span *ngIf="!updatingItem">Actualizar articulo</span>
+                        <div class="spinner-grow" role="status" *ngIf="updatingItem">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT ITEM MODAL ---------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- DELETE ITEM MODAL ------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deleteItemButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deleteItemModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.ItemStore_Delete)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteItemModalLabel">Eliminar articulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12 text-center">
+                    <p>
+                        Se eliminará el siguiente articulo <b>{{deleteItemForm.value.code}}</b>.
+                        <img width="200px" height="200px" [src]="imagePathDelete" *ngIf="imagePathDelete"/>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="deletingItem" (click)="onDeleteItem()">
+                        <span *ngIf="!deletingItem">Eliminar articulo</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingItem">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END DELETE ITEM MODAL --------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- ERROR ALERT -->
+    <div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+        <span>{{errorMessage}}</span>
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+        <span>{{alertMessage}}</span>
+    </div>
+</main>
+
+<div class="d-flex justify-content-center align-items-center col-12 p-2" *ngIf="!permissions.includes(PermissionEnum.Item_Admin)">
+    <span class="text-danger">¡Sin autorización - 401!</span>
+</div>

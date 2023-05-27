@@ -1,0 +1,14 @@
+.cursor-pointer{
+    cursor: pointer;
+}
+
+#login-background-left{
+    background-image: url('../../../assets/backgrounds/login-background.jpg');
+    background-repeat:no-repeat;
+    background-size: 100% 100%;
+}
+
+#login-background-left-contrast{
+    background-color: black;
+    opacity: 0.6;
+}

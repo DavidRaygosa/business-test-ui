@@ -5,8 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "dev": "ng serve --configuration=development",
+    "prod": "ng serve --configuration=production"
   },
   "private": true,
   "dependencies": {
@@ -18,7 +18,15 @@
     "@angular/platform-browser": "^15.2.0",
     "@angular/platform-browser-dynamic": "^15.2.0",
     "@angular/router": "^15.2.0",
+    "@auth0/angular-jwt": "^5.1.2",
+    "@fortawesome/angular-fontawesome": "^0.12.1",
+    "@fortawesome/fontawesome-svg-core": "^6.2.1",
+    "@fortawesome/free-solid-svg-icons": "^6.2.1",
+    "aos": "^2.3.4",
+    "bootstrap": "^5.2.3",
+    "ngx-cookie-service": "^15.0.0",
     "rxjs": "~7.8.0",
+    "skeleton-elements": "^4.0.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"
   },
@@ -26,6 +34,7 @@
     "@angular-devkit/build-angular": "^15.2.8",
     "@angular/cli": "~15.2.8",
     "@angular/compiler-cli": "^15.2.0",
+    "@types/aos": "^3.0.4",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.5.0",
     "karma": "~6.4.0",

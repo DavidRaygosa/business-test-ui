@@ -1,0 +1,207 @@
+<div *ngIf="!loadingRoles">
+
+    <main class="col-12 p-4" *ngIf="permissions.includes(PermissionEnum.Role_Get_All)">
+        
+        <h3 class="text-muted">Roles</h3>
+        <hr/>
+
+        <div class="d-flex justify-content-end col-12 mb-2" *ngIf="permissions.includes(PermissionEnum.Role_Create)">
+            <button class="btn btn-warning" (click)="onShowCreateModal()">
+                <fa-icon [icon]="faPlus" class="col-2 text-center"></fa-icon>
+                Crear role
+            </button>
+        </div>
+
+        <div class="table-responsive" *ngIf="Roles.length > 0">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Role_Update)">Editar</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Role_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let role of Roles">
+                        <th scope="row">{{role.name}}</th>
+                        <td *ngIf="permissions.includes(PermissionEnum.Role_Update)">
+                            <button class="btn btn-primary" (click)="onShowEditRoleModal(role)"><fa-icon [icon]="faPencil"></fa-icon></button>
+                        </td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Role_Delete)">
+                            <button class="btn btn-danger" (click)="onShowDeleteModal(role)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-12 text-center" *ngIf="Roles.length <= 0">
+            <span class="text-muted">No hay ningun role de momento</span>
+        </div>
+
+    </main>
+
+    <div class="col-12 d-flex justify-content-center align-items-center" *ngIf="!permissions.includes(PermissionEnum.Role_Get_All)">
+        <span class="text-danger">Sin autorización - 401</span>
+    </div>
+
+    <!--------------------------------------------------------- CREATE ROLE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #newRoleButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#newRoleModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newRoleModal" tabindex="-1" aria-labelledby="newRoleModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Role_Create)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newRoleModalLabel">Crear role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="newRoleForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !newRoleForm.get('name')?.valid }" 
+                                    id="newRole-name-input" 
+                                    placeholder="Nombre" 
+                                    formControlName="name"
+                                >
+                                <label for="newRole-name-input">Nombre</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" [disabled]="!newRoleForm.valid || creatingRole" (click)="onCreateRole()">
+                        <span *ngIf="!creatingRole">Crear role</span>
+                        <div class="spinner-grow" role="status" *ngIf="creatingRole">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END CREATE ROLE MODAL -------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- EDIT ROLE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #editRoleButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#editRoleModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Role_Update)">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRoleModalLabel">Editar role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <ul class="list-unstyled" *ngIf="Permissions.length > 0">
+                        <li class="mb-2" *ngFor="let permission of Permissions">
+                            <div class="form-check">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    [id]="'permissionCheck_'+permission.id" 
+                                    [checked]="handleRole?.permissions?.includes((permission.name).toString())"
+                                    (change)="onChangePermission($event)"
+                                    [value]="permission.name"
+                                >
+                                <label class="form-check-label" [for]="'permissionCheck_'+permission.id">
+                                    {{permission.name}}
+                                </label>
+                            </div>
+                            <hr/>
+                        </li>
+                    </ul>
+                    <div class="col-12 text-center" *ngIf="Permissions.length <= 0"><span class="text-muted">Sin permisos</span></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" [disabled]="updatingRole" (click)="onUpdateRole()">
+                        <span *ngIf="!updatingRole">Actualizar role</span>
+                        <div class="spinner-grow" role="status" *ngIf="updatingRole">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT ROLE MODAL -------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- DELETE ROLE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deleteRoleButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deleteRoleModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteRoleModal" tabindex="-1" aria-labelledby="deleteRoleModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Role_Delete)">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteRoleModalLabel">Eliminar role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Se eliminará el siguiente role <b>{{handleRole?.name}}</b></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="deletingRole" (click)="onDeleteRole()">
+                        <span *ngIf="!deletingRole">Eliminar role</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingRole">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- DELETE EDIT ROLE MODAL -------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+</div>
+
+<div class="d-flex flex-wrap col-12 p-4" *ngIf="loadingRoles">
+    <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+</div>
+
+<!-- ERROR ALERT -->
+<div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+    <span>{{errorMessage}}</span>
+</div>
+
+<!-- ALERT -->
+<div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+    <span>{{alertMessage}}</span>
+</div>

@@ -1,0 +1,229 @@
+<main id="store-admin-panel" class="d-flex flex-column col-12 p-2" *ngIf="permissions.includes(PermissionEnum.Store_Admin)">
+
+    <div class="d-flex justify-content-end col-12" *ngIf="permissions.includes(PermissionEnum.Store_Create)">
+        <button class="btn btn-warning" (click)="onShowCreateStoreModal()">
+            <fa-icon [icon]="faPlus" class="col-2 text-center"></fa-icon>
+            Crear sucursal
+        </button>
+    </div>
+
+    <div class="col-12 mt-2" *ngIf="!loadingStores && permissions.includes(PermissionEnum.Store_Get_All)">
+        <hr />
+        <div class="table-responsive">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Ubicación</th>
+                        <th scope="col">Gestionar articulos</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Store_Update)">Editar</th>
+                        <th scope="col" *ngIf="permissions.includes(PermissionEnum.Store_Delete)">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let store of Stores">
+                        <th scope="row">{{store.branch}}</th>
+                        <td class="text-wrap">{{store.direction}}</td>
+                        <td><button class="btn btn-success" [routerLink]="['./', store.id]"><fa-icon [icon]="faBoxArchive"></fa-icon></button></td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Store_Update)">
+                            <button class="btn btn-primary" (click)="onShowUpdateModal(store)"><fa-icon [icon]="faPencil"></fa-icon></button>
+                        </td>
+                        <td *ngIf="permissions.includes(PermissionEnum.Store_Delete)">
+                            <button class="btn btn-danger" (click)="onShowDeleteModal(store)"><fa-icon [icon]="faXmark"></fa-icon></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-12 mt-2" *ngIf="loadingStores">
+        <skeleton-block effect="wave" class="col-12 mb-4" height="50px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+        <skeleton-block effect="wave" class="col-12 mb-2" height="30px"></skeleton-block>
+    </div>
+
+    <!--------------------------------------------------------- NEW STORE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #newStoreButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#newStoreModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newStoreModal" tabindex="-1" aria-labelledby="newStoreModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Store_Create)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newStoreModalLabel">Crear sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="createStoreForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !createStoreForm.get('branch')?.valid }" 
+                                    id="newStore-branch-input" 
+                                    placeholder="Nombre" 
+                                    formControlName="branch"
+                                >
+                                <label for="newStore-branch-input">Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faLocationDot" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !createStoreForm.get('direction')?.valid }" 
+                                    id="newStore-direction-input" 
+                                    placeholder="Dirección (opcional)" 
+                                    formControlName="direction"
+                                >
+                                <label for="newStore-direction-input">Dirección (opcional)</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning" [disabled]="!createStoreForm.valid || creatingStore" (click)="onNewStoreSubmit()">
+                        <span *ngIf="!creatingStore">Crear sucursal</span>
+                        <div class="spinner-grow" role="status" *ngIf="creatingStore">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END NEW ITEM MODAL ----------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- EDIT STORE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #editStoreButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#editStoreModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editStoreModal" tabindex="-1" aria-labelledby="editStoreModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Store_Update)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editStoreModalLabel">Actualizar sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12">
+                    <form [formGroup]="editStoreForm" class="col-12 text-center">
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faTextHeight" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editStoreForm.get('branch')?.valid }" 
+                                    id="newStore-branch-input" 
+                                    placeholder="Nombre" 
+                                    formControlName="branch"
+                                >
+                                <label for="newStore-branch-input">Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-2 d-flex flex-row justify-content-center align-items-center">
+                            <fa-icon [icon]="faLocationDot" class="col-2 text-center"></fa-icon>
+                            <div class="form-floating col-10">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    [ngClass]="{ 'border-danger': !editStoreForm.get('direction')?.valid }" 
+                                    id="newStore-direction-input" 
+                                    placeholder="Dirección (opcional)" 
+                                    formControlName="direction"
+                                >
+                                <label for="newStore-direction-input">Dirección (opcional)</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!editStoreForm.valid || updatingStore" (click)="onUpdateStore()">
+                        <span *ngIf="!updatingStore">Actualizar sucursal</span>
+                        <div class="spinner-grow" role="status" *ngIf="updatingStore">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END EDIT STORE MODAL ---------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!--------------------------------------------------------- DELETE STORE MODAL --------------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- Button trigger modal -->
+    <button #deleteStoreButton type="button" class="btn btn-primary visually-hidden" data-bs-toggle="modal" data-bs-target="#deleteStoreModal"></button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteStoreModal" tabindex="-1" aria-labelledby="deleteStoreModalLabel" aria-hidden="true" *ngIf="permissions.includes(PermissionEnum.Store_Delete)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteStoreModalLabel">Eliminar sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body col-12 text-center">
+                    <p>
+                        Se eliminará la siguiente sucursal <b>{{deleteStoreForm.value.branch}}</b>.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" [disabled]="!deleteStoreForm.valid || deletingStore" (click)="onDeleteStore()">
+                        <span *ngIf="!deletingStore">Eliminar sucursal</span>
+                        <div class="spinner-grow" role="status" *ngIf="deletingStore">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--------------------------------------------------------- END DELETE STORE MODAL ---------------------------------------------------------
+    -----------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------------------------------------------------------------->
+
+    <!-- ERROR ALERT -->
+    <div class="alert alert-danger fixed-bottom col-12 text-center" role="alert" *ngIf="error">
+        <span>{{errorMessage}}</span>
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert alert-primary fixed-bottom col-12 text-center" role="alert" *ngIf="alert">
+        <span>{{alertMessage}}</span>
+    </div>
+</main>
+
+<div class="d-flex justify-content-center align-items-center col-12 p-2" *ngIf="!permissions.includes(PermissionEnum.Store_Admin)">
+    <span class="text-danger">¡Sin autorización - 401!</span>
+</div>
